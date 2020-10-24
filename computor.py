@@ -140,7 +140,7 @@ def solve(s, abc):
 	delta = abc[1] * abc[1] - 4 * abc[0] * abc[2]
 	print("delta = " + str(delta))
 	if delta > 0:
-		print("there is two solutions")
+		print("there are two solutions")
 
 		x1 = (-1 * abc[1] - math.sqrt(delta)) / (2 * abc[0])
 		x2 = (-1 * abc[1] + math.sqrt(delta)) / (2 * abc[0])
