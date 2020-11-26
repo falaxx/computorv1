@@ -1,8 +1,6 @@
-import argparse
 import sys
 import numpy as np
 import os
-import math
 
 def exit(error):
 	if error == 0:
@@ -12,7 +10,7 @@ def exit(error):
 	if error == 2:
 		print("X should be followed by ^ and preceded by *")
 	if error == 3:
-		print("^ should be followed by 0 1 or 2 and preceded by X ")
+		print("^ should be followed by 0 1 2 or 3 and preceded by X ")
 	if error == 4:
 		print("- or + should be followed by one space then a number")
 	if error == 5:
@@ -27,19 +25,18 @@ def exit(error):
 		print("All reel number are solution")
 	if error == 9:
 		print("There is no solution")
+	if error == 10:
+		print("Can't compute degree three ")
 	os._exit(os.EX_OK)
 
 
 
 def check(s):
-	stage = 0
-	neg = 0
 	s.replace('\t',' ')
 	s1 = s.split()
 	if (s1[len(s1)-1].find("X^") == -1):
 		exit(0)
 	for i in range(0,len(s1)):
-		print(s1[i])
 		for j in range(0,len(s1[i])):
 			if s1[i][0].isdigit():
 				if (i +1 > len(s1) or s1[i+1][0] != "*"):
@@ -60,33 +57,26 @@ def check(s):
 				if ((j + 1 < len(s1[i]) and s1[i][j+1] != "^") or (j + 1 >= len(s1[i])) or i == 0):
 					exit(2)
 			if (s1[i][j] == "^"):
-				if (j != len(s1[i]) -2 or ( s1[i][j+1] != "1" and s1[i][j+1] != "2" and s1[i][j+1] != "0")):
+				if (j != len(s1[i]) -2 or ( s1[i][j+1] != "1" and s1[i][j+1] != "2" and s1[i][j+1] != "0" and s1[i][j+1] != "3")):
 					exit(3)
-			if (s1[i][j] == "-"):
-				neg = 1
-		# print(s1[i])
 	
 def verif_str(s):
 	for j in range (0,len(s)):
 		for i in range(0,len(s[j])):
-			print(s[j][i])
 			if(s[j][i].isdigit() == False and s[j][i]!= "-" and s[j][i]!= "." and s[j][i]!= "*" and s[j][i]!= "+" and s[j][i]!= "X" and s[j][i]!= "^" and s[j][i]!= " " and s[j][i]!= "\t"):
 				exit(14)
     
 def simplify(s, abc):
 	tmp = np.zeros(1)
 	neg = 0
-	stage = 0
 	s1 = s[0].split()
 	s2 = s[1].split()
 	for i in range(0,len(s1)):
-		# print(s1[i])
 		if (s1[i][0].isdigit()  == True):
 			tmp = float(s1[i])
 			if neg == 1:
 				tmp = tmp * -1
 				neg = 0
-			print (tmp)
 		if (s1[i][0] == "-" ):
 			neg = 1
 		if (s1[i] == "X^0"):
@@ -98,11 +88,13 @@ def simplify(s, abc):
 		if (s1[i] == "X^2"):
 			abc[0] += tmp
 			tmp = 0
+		if (s1[i] == "X^3"):
+			abc[3] += tmp
+			tmp = 0
 
 	tmp = 0
 	neg = 0
 	for i in range(0,len(s2)):
-		print(s1[i])
 		if (s2[i][0].isdigit()  == True):
 			tmp = float(s2[i])
 			if neg == 1:
@@ -119,49 +111,68 @@ def simplify(s, abc):
 		if (s2[i] == "X^2"):
 			abc[0] -= tmp
 			tmp = 0
-		print (tmp)
-		
-	print(abc)	
+		if (s2[i] == "X^3"):
+			abc[3] -= tmp
+			tmp = 0
+
 	print("reduced form")
 	str1 = str(abc[1])
 	str0 = str(abc[0])
+	str2 = ""
+	if abc[3] != 0:
+		if (abc[3] >= 0):
+			str2 =  "+ " + str(abc[3]) + " * X^3 "
+		else:
+			str2 = str(abc[3]) + " * X^3 "
+
 	if (abc[1] >= 0):
 		str1 = "+ " + str1
 	if (abc[0] >= 0):
 		str0 = "+ " + str0
-	print(str(abc[2]) + " * X^0 " + str1 + " * X^1 " + str0 + " * X^2 = 0")
+	print(str(abc[2]) + " * X^0 " + str1 + " * X^1 " + str0 + " * X^2 " + str2 + "= 0")
+	if abc[3] != 0:
+		exit(10)
 	return abc
 
+def abs_(number):
+	if (number < 0):
+		number = number * - 1
+	return number
 
 def solve(s, abc):
 	if (abc[0] == 0 and abc[1] == 0 and abc[2] == 0):
 		exit(8)
-	    #    b * b - 4 * a * c
+	if (abc[0] == 0):
+		if (abc[1] == 0):
+			exit(9)
+		print ("x = " + str(abc[2] / abc[1]))
+		exit(42)
 	delta = abc[1] * abc[1] - 4 * abc[0] * abc[2]
 	print("delta = " + str(delta))
 	if delta > 0:
 		print("there are two solutions")
-
-		x1 = (-1 * abc[1] - math.sqrt(delta)) / (2 * abc[0])
-		x2 = (-1 * abc[1] + math.sqrt(delta)) / (2 * abc[0])
+		x1 = (-1 * abc[1] - delta ** 0.5) / (2 * abc[0])
+		x2 = (-1 * abc[1] + delta ** 0.5) / (2 * abc[0])
 		print ("x1 = " + str(x1) + " x2 = " + str(x2))
-		# x1 = (- abc[1] - racinedelta) / 2a   (-b + racinedelta) / 2 
 	if delta < 0:
-		exit(9)
+		if (((abs(delta) ** 0.5) / (2 * abc[0])) < 0):
+			print(str((-1 *abc[1]) / (2 * abc[0])) + " " + str((abs_(delta) ** 0.5) / (2 * abc[0])) + "i")
+			print(str((-1 *abc[1]) / (2 * abc[0])) + " +" + str(-(abs_(delta) ** 0.5) / (2 * abc[0])) + "i")
+		else:
+			print(str((-1 *abc[1]) / (2 * abc[0])) + " +" + str((abs_(delta) ** 0.5) / (2 * abc[0])) + "i")
+			print(str((-1 *abc[1]) / (2 * abc[0])) + " " + str(-(abs_(delta) ** 0.5) / (2 * abc[0])) + "i")
 	if delta == 0:
 		print("there is one solution")
 		x1 = -1 * abc[1] / (2 * abc[0])
 		print("x = " + str(x1))
-		# -b / 2a 
 
 
 	
 		
 def compute(s):
-	abc = np.zeros(3)
+	abc = np.zeros(4)
 	verif_str(s)
 	check(s[0])
-	# print("=")
 	check(s[1])
 	abc = simplify(s,abc)
 	solve(s,abc)
