@@ -27,6 +27,10 @@ def exit(error):
 		print("There is no solution")
 	if error == 10:
 		print("Can't compute degree three ")
+	if error == 11:
+		print("Too much minus in a row")
+	if error == 12:
+		print("Error with minus sign")
 	os._exit(os.EX_OK)
 
 
@@ -42,12 +46,25 @@ def check(s):
 				if (i +1 > len(s1) or s1[i+1][0] != "*"):
 					exit(7)
 			if (s1[i][j] == "."):
-				test = s1[i].split(".")
+				test = s1[i]
+				if s1[i][0] == "-":
+					test = test.replace(s1[i][:1], '')
+				test = test.split(".")
 				if (len(test)!= 2 or test[0].isnumeric() == False or test[1].isnumeric() == False):
 					exit(6)
-			if ((s1[i][j] == "-" or s1[i][j] == "+" or s1[i][j] == "*") and (len(s1[i]) != 1)):
+			if ((s1[i][j] == "+" or s1[i][j] == "*") and (len(s1[i]) != 1)):
 				exit(1)
-			if ((s1[i][j] == "-" or s1[i][j] == "+") and s1[i+1][0].isdigit() == False):
+			if (s1[i][j] == "-" and j != 0):
+				exit(4)
+			if (s1[i][j] == "-" and len(s1[i]) != 1 and (s1[i][j+1].isdigit() == False or s1[i+1][0]!= '*')):
+				exit(12)
+			if (s1[i][j] == "-" and (len(s1[i]) == 1) and (s1[i+1][0].isdigit() == False and s1[i+1][0] != "-" )):
+				exit(12)
+			if (s1[i][j] == "-" and (len(s1[i]) == 1) and s1[i+1][0] == "-" and len(s1[i+1]) == 1):
+				exit(12)
+			if (s1[i][j] == "-" and len(s1) > i+1 and s1[i+2][0] == "-"):
+				exit(11)
+			if (s1[i][j] == "+" and ((s1[i+1][0] == "-" and len(s1[i+1]) <= 1) or (s1[i+1][0].isdigit() == False and s1[i+1][0] != "-"))):
 				exit(4)
 			if ((s1[i][j] == "*") and s1[i+1][0] != "X"):	
 				exit(5)
@@ -78,7 +95,13 @@ def simplify(s, abc):
 				tmp = tmp * -1
 				neg = 0
 		if (s1[i][0] == "-" ):
-			neg = 1
+			if (len(s1[i]) == 1):
+				neg = 1	
+			if len(s1[i])!=1:
+				tmp = float(s1[i])
+				if neg == 1:
+					tmp = -tmp
+					neg = 0
 		if (s1[i] == "X^0"):
 			abc[2] += tmp
 			tmp = 0
@@ -101,7 +124,15 @@ def simplify(s, abc):
 				tmp = tmp * -1
 				neg = 0
 		if (s2[i][0] == "-" ):
-			neg = 1
+			if (len(s2[i]) == 1):
+				neg = 1	
+			if len(s2[i])!=1:
+				tmp = float(s2[i])
+				if neg == 1:
+					tmp = -tmp
+					neg = 0
+				# print(tmp)
+			
 		if (s2[i] == "X^0"):
 			abc[2] -= tmp
 			tmp = 0
@@ -120,15 +151,26 @@ def simplify(s, abc):
 	str0 = str(abc[0])
 	str2 = ""
 	if abc[3] != 0:
-		if (abc[3] >= 0):
+		if (abc[3] > 0):
 			str2 =  "+ " + str(abc[3]) + " * X^3 "
 		else:
 			str2 = str(abc[3]) + " * X^3 "
-
 	if (abc[1] >= 0):
 		str1 = "+ " + str1
 	if (abc[0] >= 0):
 		str0 = "+ " + str0
+	if (abc[3] == 0):
+		if (abc[0] == 0):
+			if (abc[1] == 0):
+				if (abc[2] == 0):
+					print ("0 = 0")
+					return abc
+				print(str(abc[2]) + " * X^0 " + "= 0")
+				return abc
+			print(str(abc[2]) + " * X^0 " + str1 + " * X^1 " + "= 0")
+			return abc
+		print(str(abc[2]) + " * X^0 " + str1 + " * X^1 " + str0 + " * X^2 " + "= 0")
+		return abc
 	print(str(abc[2]) + " * X^0 " + str1 + " * X^1 " + str0 + " * X^2 " + str2 + "= 0")
 	if abc[3] != 0:
 		exit(10)
@@ -145,7 +187,7 @@ def solve(s, abc):
 	if (abc[0] == 0):
 		if (abc[1] == 0):
 			exit(9)
-		print ("x = " + str(abc[2] / abc[1]))
+		print ("x = " + str(-abc[2] / abc[1]))
 		exit(42)
 	delta = abc[1] * abc[1] - 4 * abc[0] * abc[2]
 	print("delta = " + str(delta))
@@ -170,12 +212,15 @@ def solve(s, abc):
 	
 		
 def compute(s):
-	abc = np.zeros(4)
-	verif_str(s)
-	check(s[0])
-	check(s[1])
-	abc = simplify(s,abc)
-	solve(s,abc)
+	try:
+		abc = np.zeros(4)
+		verif_str(s)
+		check(s[0])
+		check(s[1])
+		abc = simplify(s,abc)
+		solve(s,abc)
+	except:
+		exit(14)
 
 
 
