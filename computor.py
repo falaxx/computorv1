@@ -26,7 +26,8 @@ def exit(error):
 	if error == 9:
 		print("There is no solution")
 	if error == 10:
-		print("Can't compute degree three ")
+		print("Polynomial degree: 3")
+		print("Can't compute degree three")
 	if error == 11:
 		print("Too much minus in a row")
 	if error == 12:
@@ -131,8 +132,6 @@ def simplify(s, abc):
 				if neg == 1:
 					tmp = -tmp
 					neg = 0
-				# print(tmp)
-			
 		if (s2[i] == "X^0"):
 			abc[2] -= tmp
 			tmp = 0
@@ -144,8 +143,7 @@ def simplify(s, abc):
 			tmp = 0
 		if (s2[i] == "X^3"):
 			abc[3] -= tmp
-			tmp = 0
-
+			tmp = 0			
 	print("reduced form")
 	str1 = str(abc[1])
 	str0 = str(abc[0])
@@ -181,7 +179,26 @@ def abs_(number):
 		number = number * - 1
 	return number
 
+def degree(abc):
+	if abc[3] == 0:
+		if abc[0] == 0:
+			if abc[1] == 0:
+				if abc[2] == 0:
+					print("Polynomial degree: 0")
+					return
+				print("Polynomial degree: 0")
+				return
+			print("Polynomial degree: 1")
+			return
+		print("Polynomial degree: 2")
+		return
+	print("Polynomial degree: 3")
+	return
+				
+
+
 def solve(s, abc):
+	degree(abc)
 	if (abc[0] == 0 and abc[1] == 0 and abc[2] == 0):
 		exit(8)
 	if (abc[0] == 0):
@@ -190,26 +207,24 @@ def solve(s, abc):
 		print ("x = " + str(-abc[2] / abc[1]))
 		exit(42)
 	delta = abc[1] * abc[1] - 4 * abc[0] * abc[2]
-	print("delta = " + str(delta))
+	print("Delta = " + str(delta))
 	if delta > 0:
-		print("there are two solutions")
+		print("There are two solutions:")
 		x1 = (-1 * abc[1] - delta ** 0.5) / (2 * abc[0])
 		x2 = (-1 * abc[1] + delta ** 0.5) / (2 * abc[0])
 		print ("x1 = " + str(x1) + " x2 = " + str(x2))
 	if delta < 0:
+		print("There are two solutions:")
 		if (((abs(delta) ** 0.5) / (2 * abc[0])) < 0):
-			print(str((-1 *abc[1]) / (2 * abc[0])) + " " + str((abs_(delta) ** 0.5) / (2 * abc[0])) + "i")
-			print(str((-1 *abc[1]) / (2 * abc[0])) + " +" + str(-(abs_(delta) ** 0.5) / (2 * abc[0])) + "i")
+			print("x1 = " + str((-1 *abc[1]) / (2 * abc[0])) + " " + str((abs_(delta) ** 0.5) / (2 * abc[0])) + "i")
+			print("x2 = " + str((-1 *abc[1]) / (2 * abc[0])) + " +" + str(-(abs_(delta) ** 0.5) / (2 * abc[0])) + "i")
 		else:
-			print(str((-1 *abc[1]) / (2 * abc[0])) + " +" + str((abs_(delta) ** 0.5) / (2 * abc[0])) + "i")
-			print(str((-1 *abc[1]) / (2 * abc[0])) + " " + str(-(abs_(delta) ** 0.5) / (2 * abc[0])) + "i")
+			print("x1 = " + str((-1 *abc[1]) / (2 * abc[0])) + " +" + str((abs_(delta) ** 0.5) / (2 * abc[0])) + "i")
+			print("x2 = " + str((-1 *abc[1]) / (2 * abc[0])) + " " + str(-(abs_(delta) ** 0.5) / (2 * abc[0])) + "i")
 	if delta == 0:
-		print("there is one solution")
+		print("There is one solution:")
 		x1 = -1 * abc[1] / (2 * abc[0])
 		print("x = " + str(x1))
-
-
-	
 		
 def compute(s):
 	try:
@@ -222,21 +237,22 @@ def compute(s):
 	except:
 		exit(14)
 
-
-
-
 def main():
-	if len(sys.argv) == 2 :
-		str_arg = sys.argv[1]
-		str_arg = str_arg.split("=")
-		if(len(str_arg) == 2):
-			str_arg[0] = str_arg[0].strip()
-			str_arg[1] = str_arg[1].strip()
-			compute(str_arg)
+	try:
+		if len(sys.argv) == 2 :
+			str_arg = sys.argv[1]
+			str_arg = str_arg.split("=")
+			if(len(str_arg) == 2):
+				str_arg[0] = str_arg[0].strip()
+				str_arg[1] = str_arg[1].strip()
+				compute(str_arg)
+			else:
+				print("Wrong number of arguments")
 		else:
-			print("Wrong number of arguments")
-	else:
-		print("Need exactly one argument : the polynomial equation")
+			print("Need exactly one argument : the polynomial equation")
+	except:
+		print("Error")
+		return
 
 if __name__ == "__main__":
 	main()
